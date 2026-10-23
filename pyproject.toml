@@ -8,6 +8,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+agent = [
+    "strands-agents>=1.56,<2",
+]
 mcp-server = [
     "mcp>=2.3,<3",
+]
+
+[tool.uv]
+conflicts = [
+    [
+        { extra = "agent" },
+        { extra = "mcp-server" },
+    ],
 ]

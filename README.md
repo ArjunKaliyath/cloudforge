@@ -200,3 +200,49 @@ Live validation used the official MCP client over the HTTP endpoint. It listed
 exactly the three approved tools, invoked each one, and received valid structured
 results with no tool errors. The server was stopped afterward. The ECS worker
 remained at zero tasks throughout the test.
+
+## Milestone 6: Strands + Bedrock incident agent
+
+`incident_agent.py` creates one Strands agent backed by Amazon Nova Micro in
+Bedrock. Nova Micro is the low-cost text model used for this MVP. The agent can
+discover only the three CloudForge tools through the MCP client. Its toolset has
+no direct infrastructure client, shell, or remediation capability.
+
+The model is limited to 600 output tokens per turn. Each investigation is also
+limited to five model turns and 2,400 output tokens in total. Those limits
+prevent an accidental tool loop from producing an unbounded model bill.
+
+The local IAM user needs the narrow permissions in
+`infra/bedrock-agent-iam-policy.json`. The policy permits read-only model
+discovery plus non-streaming invocation of only Nova Micro in `us-east-1`.
+
+Strands currently requires an older MCP client SDK than the MCP 2.3 server.
+UV therefore locks them as incompatible extras. Run the server and agent in two
+isolated environments so each process receives the correct SDK version.
+
+In the first PowerShell terminal, start the MCP server:
+
+```powershell
+$env:AWS_PROFILE = "arjun"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+uv run --isolated --locked --extra mcp-server mcp_server.py
+```
+
+In a second PowerShell terminal, run one investigation:
+
+```powershell
+uv run --isolated --locked --extra agent incident_agent.py `
+  --profile arjun `
+  --region us-east-1 `
+  "Why are orders delayed?"
+```
+
+The command prints the diagnosis, the MCP tools that were actually used, the
+number of model turns, token usage, and the stop reason.
+
+Live validation passed with Nova Micro. In two model turns the agent called all
+three tools, reported zero desired and running ECS tasks, found five available
+SQS messages, and correlated repeated `Database connection failed` CloudWatch
+records. It recommended investigating the connection and restarting worker
+capacity without executing remediation. This simple, tightly prompted workflow
+does not currently justify a more expensive model.

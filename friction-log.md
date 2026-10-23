@@ -188,3 +188,49 @@ started.
   temporary local server is stopped.
 - ECS remains at desired/running/pending 0/0/0. Milestones 1 through 5 are
   complete.
+
+## Milestone 6 — Strands + Bedrock agent in progress
+
+- AWS Core documentation search repeatedly requested authorization after the
+  plugin reported authorization was accepted. Used the official AWS and Strands
+  documentation sites as the fallback.
+- `strands-agents` 1.62 requires MCP below 2.2, while the CloudForge server uses
+  MCP 2.3 for the required protocol support. UV initially rejected the combined
+  dependency set. Declared the `agent` and `mcp-server` extras incompatible and
+  documented `uv run --isolated` for the two processes. This preserves the
+  current server and uses Strands' supported client version.
+- Added one Strands agent using Nova Micro, an MCP tool allow-list, and explicit
+  limits of 600 output tokens per model turn, five turns, and 2,400 output
+  tokens per investigation.
+- Four agent wiring tests and all 17 existing worker, diagnostics, and MCP tests
+  pass in their respective locked UV environments.
+- The read-only model discovery check failed because IAM user `arjun` does not
+  have `bedrock:ListFoundationModels`. No Bedrock model was invoked and no
+  inference charge was created. The narrow required policy is ready at
+  `infra/bedrock-agent-iam-policy.json`; live validation is waiting for it to be
+  attached.
+- After the policy was attached, model discovery succeeded. The first agent
+  launch stopped before inference because Strands rejects a `BedrockModel` that
+  receives both a configured boto3 session and a separate `region_name`.
+  Removed the redundant argument; the failed launch made no model call.
+- The live Bedrock catalog included Nova Micro, Nova Lite, Nova 2 Lite, Claude
+  Haiku 4.5, and many larger models. Kept Nova Micro because the task is a
+  short, text-only investigation with exact tool names; the CLI retains a
+  `--model-id` option if evaluation later justifies an upgrade.
+- Live validation succeeded in two model turns. Nova Micro called
+  `get_service_health`, `get_queue_status`, and `search_logs`; it correlated
+  zero running workers, five queued orders, and repeated database failures into
+  a coherent diagnosis and recommended remediation without taking action.
+- Stopped the local MCP server after validation. The ECS service remains scaled
+  to zero, and the single successful bounded investigation was the only Bedrock
+  inference run.
+
+Milestone 6 is complete. Stop here; milestone 7 (minimal React UI) has not
+started.
+
+## Checkpoint after milestone 6
+
+- Twenty-one offline tests pass across the two isolated UV environments.
+- Live Strands + Bedrock + MCP validation passed with all three approved tools.
+- The local MCP server is stopped. ECS remains at desired/running/pending
+  0/0/0, and the five demo messages remain available for the UI milestone.

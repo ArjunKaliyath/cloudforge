@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DiscoverBedrockModels",
+      "Effect": "Allow",
+      "Action": "bedrock:ListFoundationModels",
+      "Resource": "*"
+    },
+    {
+      "Sid": "InvokeNovaMicroInUsEastOne",
+      "Effect": "Allow",
+      "Action": "bedrock:InvokeModel",
+      "Resource": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-micro-v1:0"
+    }
+  ]
+}
