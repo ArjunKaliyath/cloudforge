@@ -6,6 +6,7 @@ and CloudWatch using a Strands + Bedrock agent through bounded MCP tools.
 The source of truth is [the MVP plan](docs/MVP_Plan.md). Development stops after
 each milestone for review.
 Development issues and their status are tracked in [the friction log](friction-log.md).
+The repeatable recording flow is in [the demo script](docs/DEMO_SCRIPT.md).
 
 ## Milestone 1: SQS and a local worker
 

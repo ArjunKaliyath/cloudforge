@@ -279,3 +279,18 @@ started.
   incident workspace without copying the Strands documentation structure.
 
 The milestone 7 UI refinement is complete. Milestone 8 has not started.
+
+## Milestone 8 — Demo preparation in progress
+
+- The existing demo draft used an invented queue count and overstated how freely
+  the agent selects its workflow. Replaced it with a preflight checklist and a
+  two-to-three-minute script that uses live AWS values and accurately describes
+  the prompt-bounded Strands investigation.
+- Standardized the recorded flow on one Bedrock submission: `Why are orders
+  delayed?` Alternative wording is reserved for a retake because the MVP has no
+  conversation history and each submission consumes tokens.
+- Added failure recovery and cost-safe teardown steps, including a final
+  read-only check that ECS desired, running, and pending task counts are zero.
+
+Demo script preparation is complete. The remaining milestone 8 submission
+materials have not started.
