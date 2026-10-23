@@ -113,6 +113,8 @@ Each deployment creates a new task-definition revision and sets the service to
 one running task. The script is safe to rerun against the named MVP resources.
 `infra/deployer-iam-policy.json` contains the narrow IAM additions needed to
 create and pass the two ECS roles; it is not an application runtime policy.
+Replace `ACCOUNT_ID` in that example policy with the target AWS account ID
+before attaching it.
 
 After a demo, stop runtime charges by scaling the service to zero:
 
