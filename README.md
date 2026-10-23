@@ -11,14 +11,15 @@ Development issues and their status are tracked in [the friction log](friction-l
 
 Implemented: one Python CLI to create `cloudforge-orders-queue`, seed sample
 orders, process them locally, and inspect approximate queue counts.
-Live AWS validation is pending; local access for the new IAM user `arjun` needs
-to be configured and verified.
+Live AWS validation passed: five sample orders were sent to the real SQS queue,
+processed by the local worker across three receive cycles, and deleted. Final
+available, in-flight, and delayed message counts were all zero.
 
 Prerequisites: uv, Python 3.12+, AWS credentials with SQS access, and a configured
 region. No credentials are stored in the repository. These PowerShell commands
-assume a local `arjun` profile configured for the intended IAM user, in
-`us-east-1`. That profile has not yet been configured; creating an IAM user in
-AWS does not create a local CLI profile.
+use the local `arjun` profile, verified as IAM user `arjun`, in `us-east-1`.
+Creating an IAM user in AWS does not create a local CLI profile; this profile
+was configured separately using `aws login`.
 
 ```powershell
 uv sync --locked
@@ -31,6 +32,7 @@ uv run orders.py --profile arjun --region us-east-1 worker
 uv manages `.venv` automatically; no activation or pip installation is needed.
 Dependencies are declared in `pyproject.toml` and pinned in the committed
 `uv.lock`. Use `uv add <package>` when adding a dependency, and commit both files.
+The `boto3[crt]` dependency includes support for credentials from `aws login`.
 
 The worker logs each order ID and deletes the message after successful processing.
 Stop it with Ctrl+C. Run `status` again to check the queue. Counts are approximate;
@@ -56,6 +58,6 @@ Tests use a standard-library fake SQS client and do not contact AWS. They cover
 successful acknowledgement, failed processing, delete failures, seeding, and
 empty receives. The test doubles do not require real AWS credentials.
 
-Milestone 1 is complete only after real orders enter SQS, the worker processes
-them, and queued/in-flight/delayed counts settle to zero. Broken mode,
+Milestone 1 is complete: real orders entered SQS, the worker processed
+them, and queued/in-flight/delayed counts reached zero. Broken mode,
 container deployment, diagnostics, MCP, the agent, and UI are later milestones.
