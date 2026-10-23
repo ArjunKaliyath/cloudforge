@@ -59,5 +59,34 @@ successful acknowledgement, failed processing, delete failures, seeding, and
 empty receives. The test doubles do not require real AWS credentials.
 
 Milestone 1 is complete: real orders entered SQS, the worker processed
-them, and queued/in-flight/delayed counts reached zero. Broken mode,
-container deployment, diagnostics, MCP, the agent, and UI are later milestones.
+them, and queued/in-flight/delayed counts reached zero. Container deployment,
+diagnostics, MCP, the agent, and UI are later milestones.
+
+## Milestone 2: Broken mode
+
+Set `BROKEN_MODE=true` to simulate a processing failure. No database is created
+or contacted. Valid orders produce `Database connection failed` errors instead
+of being processed or deleted. Without this setting, the worker behaves normally.
+
+```powershell
+$env:BROKEN_MODE = "true"
+uv run orders.py --profile arjun --region us-east-1 seed --count 3
+uv run orders.py --profile arjun --region us-east-1 worker --once
+uv run orders.py --profile arjun --region us-east-1 status
+```
+
+`worker --once` returns exit code 1 when a received order fails; this is expected
+in broken mode. The continuous worker keeps polling and logging failures.
+Received orders are temporarily in-flight for the queue's 30-second visibility
+timeout, then become available again. Add more orders while broken mode is
+enabled to demonstrate a growing backlog. Queue counts are approximate.
+
+To restore normal processing, set `$env:BROKEN_MODE = "false"` and run `worker`
+again. Stop it with Ctrl+C once counts settle to zero. Logs currently appear in
+the local terminal; CloudWatch logging is part of the ECS milestone.
+
+Live validation passed: the backlog grew from zero to three, then five orders.
+Broken worker runs logged processing errors and did not delete the received
+orders. Final counts were five available, zero in-flight, and zero delayed.
+The five sample messages were intentionally left queued; no worker is running.
+All nine offline tests pass, including recovery after disabling broken mode.

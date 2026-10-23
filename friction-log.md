@@ -47,13 +47,32 @@ or sign-in codes.
   IAM user `arjun`. This resolves the sign-in blocker; it does not independently
   prove the original "invalid request" was caused by permissions.
 
+## 2026-10-23 — Milestone 2: Broken mode
+
+| Issue / observation | Impact | Resolution / next action | Status |
+| --- | --- | --- | --- |
+| Intentional processing failures return exit code 1 from `worker --once`. | A successful broken-mode demo appears as a failed shell command. | Expected: verified `Database connection failed` logs and confirmed messages remain queued. Documented the exit code. | Expected behavior |
+| Received failed messages temporarily become in-flight. | Available count alone can briefly understate the backlog. | Checked available, in-flight, and delayed counts after visibility timeout; all five orders remained available. | Verified |
+
+No additional development blockers were encountered. No dependencies or AWS
+resources were added for this milestone. The simulated failure does not contact
+a database. Two seed batches reuse sample order IDs; the five SQS messages are
+separate orders for this demonstration.
+
 ## Current checkpoint
 
 - Dependency management: uv with committed `pyproject.toml` and `uv.lock`.
-- Offline verification: six tests and CLI help passed before the live test.
+- Offline verification: nine tests pass, including failed processing without
+  deletion, nonzero one-cycle exit status, and recovery after disabling broken mode.
 - Identity verified: local profile `arjun` uses IAM user `arjun` in the configured AWS account.
 - AWS resource created: SQS queue `cloudforge-orders-queue` in `us-east-1`.
-- Live validation: seeded orders 1001 through 1005; all five were logged as
+- Milestone 1 live validation: seeded orders 1001 through 1005; all five were logged as
   processed across three receive cycles. Final available, in-flight, and delayed
   counts were all zero. The queue remains available; no worker is left running.
-- Milestone 1 complete. Stop here; milestone 2 (broken mode) has not started.
+- Milestone 2 live validation: began with an empty queue; seeded three messages,
+  ran broken mode, verified three remained, seeded two more, and ran broken mode
+  again. Logs showed `Database connection failed`. Final counts: five available,
+  zero in-flight, zero delayed. No successful processing/deletion in these runs.
+- Current AWS state: five sample messages intentionally remain in the queue;
+  no worker is running. `BROKEN_MODE` was set only in the test shell processes.
+- Milestones 1 and 2 complete. Stop here; milestone 3 (ECS/Fargate) has not started.

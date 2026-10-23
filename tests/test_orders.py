@@ -26,6 +26,42 @@ orders = load_orders()
 
 
 class OrdersTests(unittest.TestCase):
+    def setUp(self):
+        environment = patch.dict(orders.os.environ, {"BROKEN_MODE": "false"})
+        environment.start()
+        self.addCleanup(environment.stop)
+
+    def test_broken_mode_preserves_valid_order_and_logs_failure(self):
+        sqs = Mock()
+        message = {"Body": '{"order_id": "1001"}', "ReceiptHandle": "receipt"}
+        with patch.dict(orders.os.environ, {"BROKEN_MODE": "true"}):
+            with self.assertLogs("cloudforge.orders", level="INFO") as logs:
+                self.assertFalse(orders.process_message(sqs, "url", message))
+        self.assertIn("Database connection failed order_id=1001", logs.output[0])
+        self.assertFalse(any("Processed" in line for line in logs.output))
+        sqs.delete_message.assert_not_called()
+
+    def test_broken_worker_once_returns_failure_without_deleting(self):
+        sqs = Mock()
+        sqs.receive_message.return_value = {"Messages": [
+            {"Body": '{"order_id": "1001"}', "ReceiptHandle": "first"},
+            {"Body": '{"order_id": "1002"}', "ReceiptHandle": "second"},
+        ]}
+        with patch.dict(orders.os.environ, {"BROKEN_MODE": "true"}):
+            with self.assertLogs("cloudforge.orders", level="ERROR") as logs:
+                self.assertEqual(orders.run_worker(sqs, "url", once=True), 1)
+        self.assertEqual(len(logs.output), 2)
+        sqs.delete_message.assert_not_called()
+
+    def test_disabling_broken_mode_allows_retry_to_succeed(self):
+        sqs = Mock()
+        message = {"Body": '{"order_id": "1001"}', "ReceiptHandle": "receipt"}
+        with patch.dict(orders.os.environ, {"BROKEN_MODE": "true"}):
+            with self.assertLogs("cloudforge.orders", level="ERROR"):
+                self.assertFalse(orders.process_message(sqs, "url", message))
+        self.assertTrue(orders.process_message(sqs, "url", message))
+        sqs.delete_message.assert_called_once_with(QueueUrl="url", ReceiptHandle="receipt")
+
     def test_success_deletes_using_receipt_handle(self):
         sqs = Mock()
         message = {"Body": '{"order_id": "1001"}', "ReceiptHandle": "receipt", "MessageId": "id"}

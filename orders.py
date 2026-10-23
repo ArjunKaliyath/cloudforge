@@ -43,6 +43,10 @@ def process_message(sqs: Any, queue_url: str, message: dict[str, Any]) -> bool:
         LOGGER.exception("Invalid order message_id=%s; leaving message in queue", message.get("MessageId"))
         return False
 
+    if os.environ.get("BROKEN_MODE", "false").strip().lower() == "true":
+        LOGGER.error("Database connection failed order_id=%s; leaving message in queue (BROKEN_MODE=true)", order_id)
+        return False
+
     # The MVP's processing operation is logging the order ID.
     LOGGER.info("Processed order_id=%s", order_id)
     sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=message["ReceiptHandle"])
