@@ -234,3 +234,25 @@ started.
 - Live Strands + Bedrock + MCP validation passed with all three approved tools.
 - The local MCP server is stopped. ECS remains at desired/running/pending
   0/0/0, and the five demo messages remain available for the UI milestone.
+
+## Milestone 7 — Minimal React UI
+
+- Added a thin FastAPI endpoint around the existing incident agent and a single
+  React + TypeScript screen. The UI derives completion checks from actual
+  Strands tool metrics instead of displaying assumed progress.
+- Kept the browser boundary narrow: the browser sends only the question and
+  receives the diagnosis, tool names, model turns, token usage, and stop reason.
+  AWS credentials and AWS SDK clients remain server-side.
+- The first TypeScript build failed because TypeScript 7 required Vite's CSS
+  side-effect import declaration. Added the standard `vite/client` type
+  reference; the production build then passed.
+- Visual QA in the local browser passed at the narrow app viewport. The landing,
+  loading, completed checks, long diagnosis, metadata, and footer rendered
+  without horizontal overflow.
+- One live end-to-end submission completed in two model turns and 6,696 total
+  tokens. The UI showed all three MCP checks and the expected diagnosis.
+- Stopped both local servers after validation. ECS remained scaled to zero and
+  no AWS resource was changed.
+
+Milestone 7 is complete. Stop here; milestone 8 (submission materials) has not
+started.

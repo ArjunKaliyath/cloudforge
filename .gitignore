@@ -7,3 +7,6 @@ __pycache__/
 .aws/
 *.log
 .pytest_cache/
+web/node_modules/
+web/dist/
+*.tsbuildinfo

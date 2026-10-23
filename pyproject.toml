@@ -9,7 +9,9 @@ dependencies = [
 
 [project.optional-dependencies]
 agent = [
+    "fastapi>=0.115,<1",
     "strands-agents>=1.56,<2",
+    "uvicorn>=0.34,<1",
 ]
 mcp-server = [
     "mcp>=2.3,<3",

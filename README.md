@@ -246,3 +246,49 @@ SQS messages, and correlated repeated `Database connection failed` CloudWatch
 records. It recommended investigating the connection and restarting worker
 capacity without executing remediation. This simple, tightly prompted workflow
 does not currently justify a more expensive model.
+
+## Milestone 7: Minimal React UI
+
+`api.py` provides the thin FastAPI boundary between the browser and the existing
+incident agent. It exposes `POST /api/investigate`, returns the diagnosis plus
+actual tool and token metrics, and does not expose AWS credentials or write
+operations to the browser.
+
+The React + TypeScript app in `web/` contains one incident screen. During a run
+it shows the ECS, SQS, and CloudWatch checks as in progress. A check becomes
+complete only when its corresponding MCP tool appears in the Strands metrics.
+
+Install the locked JavaScript dependencies and build the UI:
+
+```powershell
+Set-Location web
+npm ci
+npm run build
+Set-Location ..
+```
+
+Start the MCP server in the first terminal:
+
+```powershell
+$env:AWS_PROFILE = "arjun"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+uv run --isolated --locked --extra mcp-server mcp_server.py
+```
+
+Start FastAPI in the second terminal. It serves both the API and the built UI:
+
+```powershell
+$env:AWS_PROFILE = "arjun"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+uv run --isolated --locked --extra agent `
+  uvicorn api:app --host 127.0.0.1 --port 8001
+```
+
+Open `http://127.0.0.1:8001`, keep the default question, and select
+**Investigate**. Each submission invokes Bedrock and therefore has a small
+per-token charge. Stop both local processes with `Ctrl+C` after the demo.
+
+Live browser validation completed the full flow in two model turns. The UI
+showed all three evidence checks, the correct worker/backlog/log diagnosis, and
+6,696 total tokens reported by Strands. The MCP and FastAPI processes were
+stopped after the test; ECS remained scaled to zero.
