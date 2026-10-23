@@ -20,7 +20,7 @@ Stack:
 
 Before implementing anything, read:
 
-`MVP_PLAN.md`
+`docs/MVP_Plan.md`
 
 Build only the current MVP scope.
 
@@ -100,6 +100,10 @@ AWS access must happen through MCP tools.
 - Avoid general web search for AWS/Strands docs unless those sources are unavailable.
 
 ## Working Style
+
+Maintain `friction-log.md` as development proceeds. Record issues, their impact,
+resolution or next action, and status; update resolved entries. Never include
+credentials, tokens, or sign-in codes.
 
 For each task:
 

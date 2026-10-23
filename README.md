@@ -5,23 +5,27 @@ and CloudWatch using a Strands + Bedrock agent through bounded MCP tools.
 
 The source of truth is [the MVP plan](docs/MVP_Plan.md). Development stops after
 each milestone for review.
+Development issues and their status are tracked in [the friction log](friction-log.md).
 
 ## Milestone 1: SQS and a local worker
 
 Implemented: one Python CLI to create `cloudforge-orders-queue`, seed sample
 orders, process them locally, and inspect approximate queue counts.
-Live AWS validation is pending; the local login session needs renewal.
+Live AWS validation is pending; local access for the new IAM user `arjun` needs
+to be configured and verified.
 
 Prerequisites: uv, Python 3.12+, AWS credentials with SQS access, and a configured
 region. No credentials are stored in the repository. These PowerShell commands
-use the existing `agent-triage-dev` profile in `us-east-1`:
+assume a local `arjun` profile configured for the intended IAM user, in
+`us-east-1`. That profile has not yet been configured; creating an IAM user in
+AWS does not create a local CLI profile.
 
 ```powershell
 uv sync --locked
-uv run orders.py --profile agent-triage-dev --region us-east-1 create
-uv run orders.py --profile agent-triage-dev --region us-east-1 seed --count 5
-uv run orders.py --profile agent-triage-dev --region us-east-1 status
-uv run orders.py --profile agent-triage-dev --region us-east-1 worker
+uv run orders.py --profile arjun --region us-east-1 create
+uv run orders.py --profile arjun --region us-east-1 seed --count 5
+uv run orders.py --profile arjun --region us-east-1 status
+uv run orders.py --profile arjun --region us-east-1 worker
 ```
 
 uv manages `.venv` automatically; no activation or pip installation is needed.
