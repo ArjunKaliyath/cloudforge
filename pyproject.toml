@@ -1,0 +1,8 @@
+[project]
+name = "cloudforge"
+version = "0.1.0"
+description = "An agentic AWS incident investigation MVP"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.42,<2",
+]
