@@ -4,66 +4,32 @@ type Investigation = {
   diagnosis: string;
   tools_used: string[];
   model_turns: number;
-  tokens: {
-    input: number;
-    output: number;
-    total: number;
-  };
+  tokens: { input: number; output: number; total: number };
   stop_reason: string;
 };
 
 type RequestState = "idle" | "loading" | "success" | "error";
 
 const checks = [
-  {
-    tool: "get_service_health",
-    service: "Amazon ECS",
-    detail: "Worker health",
-    icon: "ECS",
-  },
-  {
-    tool: "get_queue_status",
-    service: "Amazon SQS",
-    detail: "Queue backlog",
-    icon: "SQS",
-  },
-  {
-    tool: "search_logs",
-    service: "CloudWatch",
-    detail: "Failure logs",
-    icon: "CW",
-  },
+  { tool: "get_service_health", service: "Amazon ECS", detail: "Inspect orders-worker task health", command: "get_service_health" },
+  { tool: "get_queue_status", service: "Amazon SQS", detail: "Measure the orders queue backlog", command: "get_queue_status" },
+  { tool: "search_logs", service: "CloudWatch", detail: "Find recent worker errors", command: "search_logs" },
 ] as const;
 
-function CloudMark() {
-  return (
-    <svg viewBox="0 0 48 48" aria-hidden="true">
-      <path d="M15.4 35.5h20.1a8.5 8.5 0 0 0 .5-17 12.3 12.3 0 0 0-23.4 3.7A6.8 6.8 0 0 0 15.4 35.5Z" />
-      <path d="m20.2 29.2 4.8-10.4 2.6 7.1h5.2" />
-    </svg>
-  );
-}
-
 function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <path d="M4 10h11M11 6l4 4-4 4" />
-    </svg>
-  );
+  return <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M12 6l4 4-4 4" /></svg>;
 }
 
 function Diagnosis({ text }: { text: string }) {
   const lines = text.split("\n").filter((line) => line.trim());
-
   return (
     <div className="diagnosis-copy">
       {lines.map((line, index) => {
         const clean = line.replaceAll("**", "").trim();
         const isHeading = line.includes("**") && clean.endsWith(":");
-        if (isHeading) {
-          return <h3 key={`${clean}-${index}`}>{clean.slice(0, -1)}</h3>;
-        }
-        return <p key={`${clean}-${index}`}>{clean}</p>;
+        return isHeading
+          ? <h3 key={`${clean}-${index}`}>{clean.slice(0, -1)}</h3>
+          : <p key={`${clean}-${index}`}>{clean}</p>;
       })}
     </div>
   );
@@ -74,20 +40,14 @@ function App() {
   const [state, setState] = useState<RequestState>("idle");
   const [result, setResult] = useState<Investigation | null>(null);
   const [error, setError] = useState("");
-
-  const completedTools = useMemo(
-    () => new Set(result?.tools_used ?? []),
-    [result],
-  );
+  const completedTools = useMemo(() => new Set(result?.tools_used ?? []), [result]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!question.trim() || state === "loading") return;
-
     setState("loading");
     setResult(null);
     setError("");
-
     try {
       const response = await fetch("/api/investigate", {
         method: "POST",
@@ -95,145 +55,123 @@ function App() {
         body: JSON.stringify({ question: question.trim() }),
       });
       const body = await response.json();
-      if (!response.ok) {
-        throw new Error(body.detail ?? "The investigation could not complete.");
-      }
+      if (!response.ok) throw new Error(body.detail ?? "The investigation could not complete.");
       setResult(body as Investigation);
       setState("success");
     } catch (requestError) {
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : "The investigation could not complete.",
-      );
+      setError(requestError instanceof Error ? requestError.message : "The investigation could not complete.");
       setState("error");
     }
   }
 
+  const stateLabel = state === "loading" ? "Running" : state === "success" ? "Complete" : state === "error" ? "Stopped" : "Ready";
+
   return (
-    <main className="app-shell">
-      <div className="ambient ambient-one" />
-      <div className="ambient ambient-two" />
+    <div className="site-shell">
+      <div className="announcement"><span>●</span> Read-only AWS incident investigation <span aria-hidden="true">→</span></div>
 
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="CloudForge home">
-          <span className="brand-mark"><CloudMark /></span>
-          <span>CloudForge</span>
+        <a className="brand" href="#overview" aria-label="CloudForge home">
+          <span className="brand-glyph">CF</span><span>CLOUDFORGE</span>
         </a>
-        <div className="read-only-badge">
-          <span className="pulse-dot" />
-          Read-only investigation
-        </div>
+        <nav aria-label="Primary navigation">
+          <a className="active" href="#investigate">Investigate</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#diagnosis">Diagnosis</a>
+        </nav>
+        <div className="stack-badge"><span>Strands</span><span>Bedrock</span></div>
       </header>
 
-      <section className="hero" id="top">
-        <div className="eyebrow"><span /> AWS incident intelligence</div>
-        <h1>Find the signal.<br /><em>Fix with confidence.</em></h1>
-        <p className="hero-copy">
-          CloudForge connects the dots across your AWS services and turns live
-          operational evidence into a clear incident diagnosis.
-        </p>
+      <div className="docs-layout">
+        <aside className="left-rail" aria-label="Investigation guide">
+          <div className="rail-title">/incident-agent</div>
+          <div className="rail-search" aria-hidden="true">⌕&nbsp; Search...</div>
+          <p className="rail-label">WORKFLOW</p>
+          <a className="rail-link active" href="#overview">Overview</a>
+          <a className="rail-link" href="#investigate">Ask a question</a>
+          <a className="rail-link" href="#evidence">Gather evidence</a>
+          <a className="rail-link" href="#diagnosis">Read diagnosis</a>
+          <p className="rail-label">AWS SIGNALS</p>
+          <span className="rail-link muted">ECS service health</span>
+          <span className="rail-link muted">SQS queue depth</span>
+          <span className="rail-link muted">CloudWatch logs</span>
+          <div className="rail-note"><span className="status-dot" />Evidence access only</div>
+        </aside>
 
-        <form className="question-card" onSubmit={submit}>
-          <label htmlFor="incident-question">Ask about your incident</label>
-          <div className="question-row">
-            <input
-              id="incident-question"
-              value={question}
-              onChange={(event) => setQuestion(event.target.value)}
-              placeholder="Why are orders delayed?"
-              maxLength={500}
-              disabled={state === "loading"}
-            />
-            <button type="submit" disabled={!question.trim() || state === "loading"}>
-              {state === "loading" ? (
-                <><span className="button-spinner" /> Investigating</>
-              ) : (
-                <>Investigate <ArrowIcon /></>
-              )}
-            </button>
-          </div>
-          <div className="form-footnote">
-            <span className="shield">✓</span>
-            Evidence only · CloudForge cannot change your infrastructure
-          </div>
-        </form>
-      </section>
+        <main className="content" id="overview">
+          <div className="breadcrumb">CloudForge / Investigation</div>
+          <section className="intro">
+            <h1>Investigate order delays</h1>
+            <p>Ask the incident agent to trace a failure across ECS, SQS, and CloudWatch. It gathers live evidence before it explains the most likely root cause.</p>
+          </section>
 
-      <section className="investigation-panel" aria-live="polite">
-        <div className="panel-heading">
-          <div>
-            <span className="section-kicker">Investigation path</span>
-            <h2>{state === "loading" ? "Gathering live evidence" : "Three signals. One diagnosis."}</h2>
-          </div>
-          <span className={`state-pill ${state}`}>
-            {state === "loading" ? "In progress" : state === "success" ? "Complete" : state === "error" ? "Needs attention" : "Ready"}
-          </span>
-        </div>
+          <div className="callout"><strong>Read-only by design.</strong><span>The agent can inspect your demo infrastructure, but it cannot change it.</span></div>
 
-        <div className="checks-grid">
-          {checks.map((check, index) => {
-            const complete = completedTools.has(check.tool);
-            return (
-              <div className={`check-card ${complete ? "complete" : ""}`} key={check.tool}>
-                <div className="service-icon">{check.icon}</div>
-                <div className="service-copy">
-                  <strong>{check.service}</strong>
-                  <span>{check.detail}</span>
-                </div>
-                <div className={`check-state ${state === "loading" ? "checking" : ""}`}>
-                  {complete ? "✓" : state === "loading" ? <span className="mini-spinner" /> : index + 1}
-                </div>
+          <section className="section" id="investigate">
+            <div className="section-number">01</div>
+            <div className="section-heading"><span>ASK THE AGENT</span><h2>What is happening?</h2></div>
+            <form className="question-console" onSubmit={submit}>
+              <div className="console-bar">
+                <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
+                <span>incident_query.txt</span>
+                <span className={`run-state ${state}`}>{stateLabel}</span>
               </div>
-            );
-          })}
-        </div>
-
-        {state === "idle" && (
-          <div className="empty-state">
-            <div className="radar"><span /></div>
-            <p>Your evidence trail will appear here.</p>
-          </div>
-        )}
-
-        {state === "loading" && (
-          <div className="loading-state">
-            <div className="scan-line" />
-            <p>The agent is checking ECS, SQS, and CloudWatch through read-only MCP tools.</p>
-          </div>
-        )}
-
-        {state === "error" && (
-          <div className="error-state">
-            <strong>Investigation stopped</strong>
-            <p>{error}</p>
-          </div>
-        )}
-
-        {state === "success" && result && (
-          <article className="diagnosis-card">
-            <div className="diagnosis-header">
-              <div className="diagnosis-icon">CF</div>
-              <div>
-                <span className="section-kicker">CloudForge diagnosis</span>
-                <h2>Orders worker incident</h2>
+              <div className="question-row">
+                <label htmlFor="incident-question" aria-label="Incident question">$</label>
+                <input id="incident-question" value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Why are orders delayed?" maxLength={500} disabled={state === "loading"} />
+                <button type="submit" disabled={!question.trim() || state === "loading"}>
+                  {state === "loading" ? <><span className="button-spinner" /> Running</> : <>Investigate <ArrowIcon /></>}
+                </button>
               </div>
-            </div>
-            <Diagnosis text={result.diagnosis} />
-            <div className="run-metadata">
-              <span>{result.model_turns} model turns</span>
-              <span>{result.tokens.total.toLocaleString()} tokens</span>
-              <span>{result.stop_reason.replaceAll("_", " ")}</span>
-            </div>
-          </article>
-        )}
-      </section>
+            </form>
+          </section>
 
-      <footer>
-        <span>CloudForge</span>
-        <span>Powered by Strands Agents + Amazon Bedrock</span>
-      </footer>
-    </main>
+          <section className="section" id="evidence" aria-live="polite">
+            <div className="section-number">02</div>
+            <div className="section-heading evidence-heading">
+              <div><span>INVESTIGATION TRACE</span><h2>Gather evidence</h2></div>
+              <span className={`state-tag ${state}`}>{stateLabel}</span>
+            </div>
+            <div className="checks-list">
+              {checks.map((check, index) => {
+                const complete = completedTools.has(check.tool);
+                return (
+                  <div className={`check-row ${complete ? "complete" : ""}`} key={check.tool}>
+                    <span className="check-index">0{index + 1}</span>
+                    <div className="check-copy"><strong>{check.service}</strong><span>{check.detail}</span></div>
+                    <code>{check.command}()</code>
+                    <div className={`check-status ${state === "loading" ? "checking" : ""}`}>{complete ? "PASS" : state === "loading" ? "..." : "WAIT"}</div>
+                  </div>
+                );
+              })}
+            </div>
+            {state === "idle" && <div className="empty-state"><span className="prompt-caret">▋</span><p>Run an investigation to populate the evidence trace.</p></div>}
+            {state === "loading" && <div className="loading-state"><span className="terminal-loader">[···]</span><p>The Strands agent is querying the three MCP tools.</p></div>}
+            {state === "error" && <div className="error-state"><strong>Investigation stopped</strong><p>{error}</p></div>}
+          </section>
+
+          <section className="section diagnosis-section" id="diagnosis">
+            <div className="section-number">03</div>
+            <div className="section-heading"><span>AGENT OUTPUT</span><h2>Diagnosis</h2></div>
+            {state === "success" && result ? (
+              <article className="diagnosis-card">
+                <div className="diagnosis-bar"><span><span className="status-dot" /> Root-cause analysis</span><span>cloudforge-agent</span></div>
+                <Diagnosis text={result.diagnosis} />
+                <div className="run-metadata"><span>turns: {result.model_turns}</span><span>tokens: {result.tokens.total.toLocaleString()}</span><span>stop: {result.stop_reason.replaceAll("_", " ")}</span></div>
+              </article>
+            ) : <div className="diagnosis-placeholder"><span>//</span>The evidence-backed diagnosis will appear here.</div>}
+          </section>
+        </main>
+
+        <aside className="right-rail" aria-label="On this page">
+          <strong>On this page</strong>
+          <a href="#overview">Overview</a><a href="#investigate">Ask the agent</a><a href="#evidence">Gather evidence</a><a href="#diagnosis">Diagnosis</a>
+          <div className="right-rule" /><span>MCP tools</span><code>3 available</code>
+        </aside>
+      </div>
+
+      <footer><span>CloudForge / Alexa+ hackathon MVP</span><span>Strands Agents + Amazon Bedrock</span></footer>
+    </div>
   );
 }
 

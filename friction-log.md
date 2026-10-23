@@ -256,3 +256,20 @@ started.
 
 Milestone 7 is complete. Stop here; milestone 8 (submission materials) has not
 started.
+
+## Milestone 7 UI refinement
+
+- The initial UI used generic gradients, glass panels, and marketing copy that
+  did not match the developer-focused Strands product. Reworked the same MVP
+  flow around the official Strands documentation visual language: a black
+  canvas, monospaced typography, green and teal accents, documentation rails,
+  thin rules, and command-style investigation output.
+- Starting the local preview inside the desktop sandbox prevented uv from
+  updating its interpreter cache. Running the same local-only server with the
+  existing uv cache permission resolved the issue; no package was installed
+  and no AWS service was called.
+- The production TypeScript build and visual checks of the question, evidence,
+  and diagnosis sections passed. The application behavior and API contract are
+  unchanged.
+
+The milestone 7 UI refinement is complete. Milestone 8 has not started.
