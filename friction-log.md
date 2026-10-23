@@ -302,3 +302,13 @@ materials have not started.
 - A second local preview could not bind to port 8001 because a FastAPI process
   was already serving the project. Reused that running local server to verify
   the rebuilt UI instead of interrupting it; no investigation was submitted.
+- Before public GitHub publication, scanned the working tree and all Git
+  revisions for AWS access keys, session tokens, passwords, private keys,
+  credential files, and environment files; none were found.
+- The privacy audit found an AWS account identifier in deployment documentation
+  and a personal author email in unpublished commits. Replaced the account
+  identifier with an `ACCOUNT_ID` placeholder and rewrote the local history to
+  use the GitHub no-reply author address before publishing.
+- GitHub CLI was unavailable. Created the public repository through GitHub,
+  preserved its MIT license commit, and pushed the sanitized `main` history to
+  `ArjunKaliyath/cloudforge`.
