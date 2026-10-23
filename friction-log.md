@@ -59,6 +59,64 @@ resources were added for this milestone. The simulated failure does not contact
 a database. Two seed batches reuse sample order IDs; the five SQS messages are
 separate orders for this demonstration.
 
+## Milestone 3 — Container deployment in progress
+
+- User approved ECR as the image registry; AGENTS.md now records that supporting
+  service. Added a Dockerfile and restricted build context; no image built yet.
+- Docker CLI is installed, but the Linux engine is unavailable. CLI startup
+  stalled; direct Desktop launch exposed the user's reported error:
+  `initializing Inference manager ... dockerInference ... The file cannot be accessed by the system`.
+- The runtime socket exists as a Windows reparse point. Matching reports exist
+  in Docker's issue tracker; the cause on this host is not yet confirmed.
+- Investigating a repair that preserves Docker images and volumes. No ECS, ECR,
+  IAM, security-group, or log-group resources have been created for milestone 3.
+- AWS identity remains `arjun`. The existing default VPC and public subnet routes
+  were inspected; no network configuration was changed.
+- Docker failure matched a stale Windows AF_UNIX runtime socket. Stopped
+  Docker/WSL, moved only `AppData/Local/Docker/run` to the recoverable backup
+  `run.stale-20261023-030716`, and restarted Desktop. Engine verification passed.
+- Local image build and CLI smoke test passed. Image runs as non-root user 10001.
+- Initial deployment script attempt exposed empty-result handling bugs before
+  creating resources; fixed and verified no resources had been created.
+- Docker's Desktop credential helper returned `The stub received bad data` for
+  ECR login. The deployment now uses a temporary isolated config with a
+  short-lived ECR token and deletes it after the push.
+- ECR image upload succeeded. Deployment then stopped on `iam:CreateRole` access
+  denial for IAM user `arjun`. A scoped policy is provided at
+  `infra/deployer-iam-policy.json`; it must be attached by an administrator.
+- After the user attached the scoped policy, both ECS IAM roles were created.
+  Deployment then exposed a strict-mode null handling bug when no existing
+  security group matched. The script now handles that empty result before
+  creating the group.
+- Security-group creation was denied because the optional creation tag requires
+  `ec2:CreateTags`, which `arjun` does not have. Removed only the optional tag;
+  no broader permission is needed for the MVP.
+- The `arjun` user cannot read Free Tier plan/usage or AWS Budgets. Cost status
+  could not be confirmed from the CLI. Keep the worker at one minimum-size task
+  only during verification, then scale it to zero.
+- No ECS service or running Fargate task has been confirmed. Milestone 3 remains
+  incomplete until healthy and broken deployments are both verified.
+
+### Milestone 3 final verification
+
+- The IAM policy attachment succeeded. Created the execution and task roles,
+  ECS cluster/service, task definitions, outbound-only security group, and
+  seven-day CloudWatch log group.
+- Healthy task revision 1 ran one Fargate task, drained all five queued orders,
+  and wrote five successful processing records to CloudWatch.
+- Broken task revision 2 ran one Fargate task, wrote five simulated database
+  errors, and did not delete the five new orders.
+- SQS approximate counts briefly returned zero immediately after receipt, then
+  showed the messages as in-flight. After the 30-second visibility timeout, all
+  five appeared as available. This was expected eventual consistency.
+- Scaled the ECS service to desired count zero after verification. Final task
+  counts are desired 0, running 0, pending 0; no Fargate task or task public IP
+  remains active.
+- Final cost inventory reported 169,667,819 bytes across three ECR image
+  digests, zero CloudWatch stored bytes at query time, and seven-day log
+  retention. ECR/log/SQS storage and requests may still consume credits even
+  with compute stopped; exact account charges remain unavailable to `arjun`.
+
 ## Current checkpoint
 
 - Dependency management: uv with committed `pyproject.toml` and `uv.lock`.
@@ -73,6 +131,8 @@ separate orders for this demonstration.
   ran broken mode, verified three remained, seeded two more, and ran broken mode
   again. Logs showed `Database connection failed`. Final counts: five available,
   zero in-flight, zero delayed. No successful processing/deletion in these runs.
-- Current AWS state: five sample messages intentionally remain in the queue;
-  no worker is running. `BROKEN_MODE` was set only in the test shell processes.
-- Milestones 1 and 2 complete. Stop here; milestone 3 (ECS/Fargate) has not started.
+- Current AWS state: five sample messages intentionally remain available in the
+  queue. ECS service `orders-worker` retains broken-mode task definition revision
+  2 but is scaled to zero. CloudWatch contains the corresponding error evidence.
+- Milestones 1, 2, and 3 complete. Stop here; milestone 4 (AWS diagnostic
+  functions) has not started.

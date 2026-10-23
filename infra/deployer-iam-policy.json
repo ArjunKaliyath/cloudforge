@@ -1,0 +1,51 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListRolesForCloudForgeDeployment",
+      "Effect": "Allow",
+      "Action": "iam:ListRoles",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageCloudForgeEcsRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:CreateRole",
+        "iam:GetRole",
+        "iam:PutRolePolicy",
+        "iam:TagRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::ACCOUNT_ID:role/cloudforge-ecs-execution-role",
+        "arn:aws:iam::ACCOUNT_ID:role/cloudforge-orders-task-role"
+      ]
+    },
+    {
+      "Sid": "PassCloudForgeRolesOnlyToEcsTasks",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::ACCOUNT_ID:role/cloudforge-ecs-execution-role",
+        "arn:aws:iam::ACCOUNT_ID:role/cloudforge-orders-task-role"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ecs-tasks.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "CreateEcsServiceLinkedRoleIfMissing",
+      "Effect": "Allow",
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "arn:aws:iam::ACCOUNT_ID:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS*",
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": "ecs.amazonaws.com"
+        }
+      }
+    }
+  ]
+}

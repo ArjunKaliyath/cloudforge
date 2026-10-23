@@ -35,6 +35,9 @@ Allowed AWS services:
 - CloudWatch
 - Bedrock
 
+Milestone 3 supporting infrastructure approved by the user: Amazon ECR for
+container images. IAM roles and the existing VPC networking support ECS/Fargate.
+
 Allowed MCP tools:
 
 - `get_service_health`

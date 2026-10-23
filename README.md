@@ -88,5 +88,50 @@ the local terminal; CloudWatch logging is part of the ECS milestone.
 Live validation passed: the backlog grew from zero to three, then five orders.
 Broken worker runs logged processing errors and did not delete the received
 orders. Final counts were five available, zero in-flight, and zero delayed.
-The five sample messages were intentionally left queued; no worker is running.
 All nine offline tests pass, including recovery after disabling broken mode.
+
+## Milestone 3: ECS/Fargate deployment
+
+The worker now runs as a Linux container on ECS/Fargate. Amazon ECR stores the
+image, and the `awslogs` driver sends container output to
+`/ecs/cloudforge/orders-worker` with seven-day retention. The task uses the
+smallest Fargate size (0.25 vCPU and 0.5 GB), a read-only root filesystem, a
+non-root container user, a queue-scoped task role, and an outbound-only security
+group. It runs in the default VPC with a temporary public IP so it can reach SQS,
+ECR, and CloudWatch without a NAT gateway.
+
+Build the local image, then deploy healthy or broken mode:
+
+```powershell
+docker build -t cloudforge-orders-worker:local .
+& .\infra\deploy-ecs.ps1 -Profile arjun -Region us-east-1 -BrokenMode:$false
+& .\infra\deploy-ecs.ps1 -Profile arjun -Region us-east-1 -BrokenMode:$true
+```
+
+Each deployment creates a new task-definition revision and sets the service to
+one running task. The script is safe to rerun against the named MVP resources.
+`infra/deployer-iam-policy.json` contains the narrow IAM additions needed to
+create and pass the two ECS roles; it is not an application runtime policy.
+
+After a demo, stop runtime charges by scaling the service to zero:
+
+```powershell
+aws ecs update-service `
+  --cluster cloudforge `
+  --service orders-worker `
+  --desired-count 0 `
+  --profile arjun `
+  --region us-east-1
+```
+
+At zero tasks, there is no running Fargate compute or task public IP. The ECS
+configuration remains ready to restart. ECR image storage, retained CloudWatch
+logs, SQS storage/requests, and future API use can still incur small charges or
+consume credits. The `arjun` IAM user currently cannot read Free Tier usage or
+AWS Budgets, so check those pages from an identity with billing access.
+
+Live validation passed in both modes. Healthy mode drained five queued orders
+and wrote `Processed order_id=...` records to CloudWatch. Broken mode wrote five
+`Database connection failed` records and left all five orders in SQS. The final
+cost-safe state is five available messages and an ECS service with desired,
+running, and pending task counts all equal to zero.
