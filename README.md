@@ -51,12 +51,12 @@ logs order IDs and has no external processing side effects.
 ## Validation
 
 ```powershell
-uv run --locked python -m unittest discover -s tests -v
+uv run --locked --extra mcp-server python -m unittest discover -s tests -v
 ```
 
-Tests use a standard-library fake SQS client and do not contact AWS. They cover
-successful acknowledgement, failed processing, delete failures, seeding, and
-empty receives. The test doubles do not require real AWS credentials.
+Tests use fake AWS clients and an in-memory MCP client; they do not contact AWS.
+They cover worker behavior, diagnostic response mapping, typed MCP schemas,
+structured tool results, and invalid MCP input. No real credentials are needed.
 
 Milestone 1 is complete: real orders entered SQS, the worker processed
 them, and queued/in-flight/delayed counts reached zero. Container deployment,
@@ -163,3 +163,40 @@ database-failure records. Standard SQS can redeliver an unacknowledged message
 after its visibility timeout, so one failed order may produce multiple log events.
 The functions use injectable boto3 clients for offline testing and are ready to
 be wrapped as bounded MCP tools in milestone 5.
+
+## Milestone 5: Streamable HTTP MCP server
+
+`mcp_server.py` exposes exactly three read-only tools:
+
+- `get_service_health`
+- `get_queue_status`
+- `search_logs`
+
+The official MCP Python SDK derives typed input schemas from the tool function
+parameters and structured output schemas from Pydantic result models. The server
+binds to `127.0.0.1:8000` by default and serves Streamable HTTP at `/mcp`.
+
+Install the MCP server dependency group and start the server with the local AWS
+profile and region:
+
+```powershell
+uv sync --locked --extra mcp-server
+$env:AWS_PROFILE = "arjun"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+uv run --locked --extra mcp-server mcp_server.py
+```
+
+An MCP client connects to:
+
+```text
+http://127.0.0.1:8000/mcp
+```
+
+Override `CLOUDFORGE_MCP_HOST` or `CLOUDFORGE_MCP_PORT` when needed. Keep the
+default localhost binding during development. The server has no arbitrary AWS
+or shell tool and performs no write operation.
+
+Live validation used the official MCP client over the HTTP endpoint. It listed
+exactly the three approved tools, invoked each one, and received valid structured
+results with no tool errors. The server was stopped afterward. The ECS worker
+remained at zero tasks throughout the test.

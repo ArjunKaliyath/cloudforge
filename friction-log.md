@@ -152,9 +152,39 @@ separate orders for this demonstration.
 
 Milestone 4 is complete. Stop here; milestone 5 (MCP server) has not started.
 
-## Current checkpoint
+## Checkpoint after milestone 4
 
 - Fifteen offline tests pass: nine worker tests and six diagnostic tests.
 - Live diagnostic results: ECS desired/running/pending 0/0/0 and unhealthy;
   SQS available/in-flight/delayed 5/0/0; CloudWatch failure search successful.
 - The ECS service remains scaled to zero. Milestones 1 through 4 are complete.
+
+## Milestone 5 — MCP server in progress
+
+- Verified the current official Python SDK release is `mcp==2.3.0`. It supports
+  the current protocol and clients using protocol version `2025-11-25`.
+- Added the SDK with uv. The server binds to localhost and exposes only the
+  three approved read-only tools over Streamable HTTP at `/mcp`.
+- Kept the MCP SDK in the `mcp-server` optional dependency group so future
+  orders-worker container builds do not install server-only packages.
+- Rebuilt the local worker image and verified boto3 is installed while `mcp` is
+  absent. No image was pushed to ECR.
+- The first HTTP smoke client ran inside the desktop sandbox and could not reach
+  the localhost server. Repeating the same client outside that boundary worked;
+  the server received five successful HTTP requests.
+- The official HTTP client listed exactly three tools and invoked all three.
+  Every call returned structured content with `is_error=false`.
+- Stopped the local MCP server after validation. ECS remained scaled to zero,
+  and no AWS resource was changed.
+
+Milestone 5 is complete. Stop here; milestone 6 (Strands + Bedrock agent) has not
+started.
+
+## Current checkpoint
+
+- Seventeen offline tests pass, including MCP discovery, calls to all three
+  tools, structured outputs, and input-bound validation.
+- Live Streamable HTTP validation passed at `http://127.0.0.1:8000/mcp`; the
+  temporary local server is stopped.
+- ECS remains at desired/running/pending 0/0/0. Milestones 1 through 5 are
+  complete.
