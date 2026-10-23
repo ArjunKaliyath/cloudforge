@@ -135,3 +135,31 @@ and wrote `Processed order_id=...` records to CloudWatch. Broken mode wrote five
 `Database connection failed` records and left all five orders in SQS. The final
 cost-safe state is five available messages and an ECS service with desired,
 running, and pending task counts all equal to zero.
+
+## Milestone 4: AWS diagnostic functions
+
+`diagnostics.py` provides the three read-only operations required by the MVP:
+
+- `get_service_health(service_name)` reads desired, running, and pending ECS
+  task counts. A service is healthy only when it is active, desires at least one
+  task, all desired tasks are running, no task is pending, and deployment has
+  not failed.
+- `get_queue_status(queue_name)` reads approximate available, in-flight, and
+  delayed SQS counts and returns their total.
+- `search_logs(log_group, query)` searches for an exact text phrase. It defaults
+  to the last 60 minutes and 20 results, with a hard maximum of 100 results.
+
+Run each diagnostic independently with the local AWS profile:
+
+```powershell
+uv run --locked diagnostics.py --profile arjun --region us-east-1 service orders-worker
+uv run --locked diagnostics.py --profile arjun --region us-east-1 queue cloudforge-orders-queue
+uv run --locked diagnostics.py --profile arjun --region us-east-1 logs /ecs/cloudforge/orders-worker "Database connection failed" --lookback-minutes 180 --limit 10
+```
+
+Live validation found the expected incident evidence: ECS desired/running counts
+were both zero, SQS had five available messages, and CloudWatch returned repeated
+database-failure records. Standard SQS can redeliver an unacknowledged message
+after its visibility timeout, so one failed order may produce multiple log events.
+The functions use injectable boto3 clients for offline testing and are ready to
+be wrapped as bounded MCP tools in milestone 5.

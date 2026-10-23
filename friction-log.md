@@ -117,7 +117,7 @@ separate orders for this demonstration.
   retention. ECR/log/SQS storage and requests may still consume credits even
   with compute stopped; exact account charges remain unavailable to `arjun`.
 
-## Current checkpoint
+## Checkpoint after milestone 3
 
 - Dependency management: uv with committed `pyproject.toml` and `uv.lock`.
 - Offline verification: nine tests pass, including failed processing without
@@ -136,3 +136,25 @@ separate orders for this demonstration.
   2 but is scaled to zero. CloudWatch contains the corresponding error evidence.
 - Milestones 1, 2, and 3 complete. Stop here; milestone 4 (AWS diagnostic
   functions) has not started.
+
+## Milestone 4 — AWS diagnostic functions in progress
+
+- AWS Core documentation search repeated its authorization request after the
+  plugin reported that authorization was accepted. Used the installed boto3
+  service models and live AWS responses as the documentation fallback.
+- All three read-only functions passed live validation. ECS reported desired 0,
+  running 0, pending 0, and unhealthy; SQS reported five available messages;
+  CloudWatch returned ten matching error events.
+- The ten log events represent two failed deliveries of each of five messages.
+  This is expected because broken mode does not acknowledge messages and SQS
+  makes them visible again after 30 seconds.
+- No AWS resource was created, updated, or restarted for this milestone.
+
+Milestone 4 is complete. Stop here; milestone 5 (MCP server) has not started.
+
+## Current checkpoint
+
+- Fifteen offline tests pass: nine worker tests and six diagnostic tests.
+- Live diagnostic results: ECS desired/running/pending 0/0/0 and unhealthy;
+  SQS available/in-flight/delayed 5/0/0; CloudWatch failure search successful.
+- The ECS service remains scaled to zero. Milestones 1 through 4 are complete.
