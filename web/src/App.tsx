@@ -68,26 +68,27 @@ function App() {
 
   return (
     <div className="site-shell">
-      <div className="announcement"><span>●</span> Read-only AWS incident investigation <span aria-hidden="true">→</span></div>
+      <div className="announcement"><span>●</span> Alexa+ MCP incident investigation · Read-only AWS evidence <span aria-hidden="true">→</span></div>
 
       <header className="topbar">
         <a className="brand" href="#overview" aria-label="CloudForge home">
-          <span className="brand-glyph">CF</span><span>CLOUDFORGE</span>
+          <span className="brand-glyph">CF</span>
+          <span className="brand-name">CLOUDFORGE <small>for Alexa+</small></span>
         </a>
         <nav aria-label="Primary navigation">
           <a className="active" href="#investigate">Investigate</a>
           <a href="#evidence">Evidence</a>
           <a href="#diagnosis">Diagnosis</a>
         </nav>
-        <div className="stack-badge"><span>Strands</span><span>Bedrock</span></div>
+        <div className="stack-badge"><span>Alexa+</span><span>MCP</span></div>
       </header>
 
       <div className="docs-layout">
         <main className="content" id="overview">
-          <div className="breadcrumb">CloudForge / Investigation</div>
+          <div className="breadcrumb">CloudForge / Alexa+ MCP demo</div>
           <section className="intro">
             <h1>Investigate order delays</h1>
-            <p>Ask the incident agent to trace a failure across ECS, SQS, and CloudWatch. It gathers live evidence before it explains the most likely root cause.</p>
+            <p>CloudForge is an Alexa+ MCP incident investigator. Ask it to trace a failure across ECS, SQS, and CloudWatch before explaining the most likely root cause.</p>
           </section>
 
           <div className="callout"><strong>Read-only by design.</strong><span>The agent can inspect your demo infrastructure, but it cannot change it.</span></div>

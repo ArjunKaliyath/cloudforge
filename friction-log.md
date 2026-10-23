@@ -294,3 +294,11 @@ The milestone 7 UI refinement is complete. Milestone 8 has not started.
 
 Demo script preparation is complete. The remaining milestone 8 submission
 materials have not started.
+
+- Added visible Alexa+ MCP positioning to the CloudForge header and opening UI
+  copy so the demo immediately communicates the original hackathon use case.
+  Kept Strands Agents and Amazon Bedrock credited separately as the underlying
+  implementation stack.
+- A second local preview could not bind to port 8001 because a FastAPI process
+  was already serving the project. Reused that running local server to verify
+  the rebuilt UI instead of interrupting it; no investigation was submitted.
