@@ -51,20 +51,7 @@ a { color: inherit; }
 .stack-badge span:last-child { color: #b9bcba; }
 
 .docs-layout {
-  width: min(1480px, 100%); margin: 0 auto; display: grid;
-  grid-template-columns: 260px minmax(0, 880px); justify-content: center;
-}
-.left-rail { position: sticky; top: 0; align-self: start; height: calc(100vh - 35px); }
-.left-rail { padding: 35px 22px 28px 24px; border-right: 1px solid #202121; }
-.rail-title { margin: 0 0 26px; color: var(--yellow); font-size: 1.23rem; font-weight: 800; letter-spacing: -.035em; }
-.rail-search { margin-bottom: 27px; padding: 12px 13px; color: #777b78; border: 1px solid #3b3d3c; border-radius: 8px; font-size: .73rem; }
-.rail-label { margin: 25px 0 9px; color: #f1f1ee; font-size: .62rem; font-weight: 900; letter-spacing: .06em; }
-.rail-link { display: block; padding: 6px 8px; color: #999c99; font-size: .72rem; line-height: 1.3; text-decoration: none; border-left: 1px solid transparent; }
-.rail-link:hover, .rail-link.active { color: var(--white); border-left-color: var(--yellow); background: linear-gradient(90deg, rgba(255, 216, 77, .09), transparent); }
-.rail-link.muted { color: #717572; }
-.rail-note {
-  position: absolute; right: 22px; bottom: 28px; left: 24px; padding-top: 16px; display: flex; align-items: center; gap: 8px;
-  color: #7f837f; border-top: 1px solid #242525; font-size: .66rem;
+  width: min(960px, 100%); margin: 0 auto;
 }
 .status-dot { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 10px rgba(255, 216, 77, .45); }
 
@@ -155,15 +142,13 @@ footer { min-height: 70px; padding: 0 28px; display: flex; align-items: center; 
 @media (max-width: 1120px) {
   .topbar { grid-template-columns: 1fr auto; }
   .topbar nav { display: none; }
-  .docs-layout { grid-template-columns: 230px minmax(0, 760px); }
 }
 
 @media (max-width: 760px) {
   .announcement { font-size: .66rem; }
   .topbar { height: 72px; padding: 0 17px; }
   .brand { font-size: 1rem; }
-  .stack-badge, .left-rail { display: none; }
-  .docs-layout { display: block; }
+  .stack-badge { display: none; }
   .content { padding: 38px 22px 72px; }
   .intro h1 { font-size: clamp(2.35rem, 12vw, 3.5rem); }
   .callout { flex-direction: column; }

@@ -83,21 +83,6 @@ function App() {
       </header>
 
       <div className="docs-layout">
-        <aside className="left-rail" aria-label="Investigation guide">
-          <div className="rail-title">/incident-agent</div>
-          <div className="rail-search" aria-hidden="true">⌕&nbsp; Search...</div>
-          <p className="rail-label">WORKFLOW</p>
-          <a className="rail-link active" href="#overview">Overview</a>
-          <a className="rail-link" href="#investigate">Ask a question</a>
-          <a className="rail-link" href="#evidence">Gather evidence</a>
-          <a className="rail-link" href="#diagnosis">Read diagnosis</a>
-          <p className="rail-label">AWS SIGNALS</p>
-          <span className="rail-link muted">ECS service health</span>
-          <span className="rail-link muted">SQS queue depth</span>
-          <span className="rail-link muted">CloudWatch logs</span>
-          <div className="rail-note"><span className="status-dot" />Evidence access only</div>
-        </aside>
-
         <main className="content" id="overview">
           <div className="breadcrumb">CloudForge / Investigation</div>
           <section className="intro">
