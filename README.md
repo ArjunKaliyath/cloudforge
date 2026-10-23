@@ -210,18 +210,6 @@ npm run build
 Set-Location ..
 ```
 
-## Demonstration
-
-The repeatable [demo script](docs/DEMO_SCRIPT.md) fits the required sub-three-
-minute video and covers:
-
-1. the customer-impact question;
-2. the read-only MCP safety boundary;
-3. one live investigation;
-4. ECS, SQS, and CloudWatch evidence;
-5. the agent's diagnosis and recommendation; and
-6. the final cost-safe ECS state.
-
 ## Product feedback
 
 ### Tools and why they were used
@@ -266,7 +254,6 @@ the [development friction log](friction-log.md).
 | [`infra/`](infra/) | ECS deployment script and scoped IAM examples |
 | [`tests/`](tests/) | Offline unit and integration-style tests |
 | [`docs/MVP_Plan.md`](docs/MVP_Plan.md) | MVP scope and acceptance criteria |
-| [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | Recording and preflight guide |
 | [`friction-log.md`](friction-log.md) | Development issues, workarounds, and feedback |
 
 ## License

@@ -280,21 +280,6 @@ started.
 
 The milestone 7 UI refinement is complete. Milestone 8 has not started.
 
-## Milestone 8 — Demo preparation in progress
-
-- The existing demo draft used an invented queue count and overstated how freely
-  the agent selects its workflow. Replaced it with a preflight checklist and a
-  two-to-three-minute script that uses live AWS values and accurately describes
-  the prompt-bounded Strands investigation.
-- Standardized the recorded flow on one Bedrock submission: `Why are orders
-  delayed?` Alternative wording is reserved for a retake because the MVP has no
-  conversation history and each submission consumes tokens.
-- Added failure recovery and cost-safe teardown steps, including a final
-  read-only check that ECS desired, running, and pending task counts are zero.
-
-Demo script preparation is complete. The remaining milestone 8 submission
-materials have not started.
-
 - Added visible Alexa+ MCP positioning to the CloudForge header and opening UI
   copy so the demo immediately communicates the original hackathon use case.
   Kept Strands Agents and Amazon Bedrock credited separately as the underlying
@@ -318,7 +303,7 @@ materials have not started.
 - **Task:** Prepare the public repository for Amazon App Dev Challenge judging.
 - **Steps:** Compared the README with the official rules, then audited its track
   declaration, MCP requirements, setup and test instructions, AWS integration
-  description, product feedback, demo guidance, license, and public links.
+  description, product feedback, license, and public links.
 - **Expected:** A judge can understand, run, test, and evaluate CloudForge from
   the repository landing page.
 - **Actual:** The existing README was a chronological milestone log, used the

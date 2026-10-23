@@ -260,7 +260,6 @@ Finish:
 
 - README
 - architecture image or simple diagram
-- `DEMO_SCRIPT.md`
 - Devpost description
 - friction log if useful
 - demo video
