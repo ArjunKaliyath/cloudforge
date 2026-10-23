@@ -163,11 +163,6 @@ function App() {
           </section>
         </main>
 
-        <aside className="right-rail" aria-label="On this page">
-          <strong>On this page</strong>
-          <a href="#overview">Overview</a><a href="#investigate">Ask the agent</a><a href="#evidence">Gather evidence</a><a href="#diagnosis">Diagnosis</a>
-          <div className="right-rule" /><span>MCP tools</span><code>3 available</code>
-        </aside>
       </div>
 
       <footer><span>CloudForge / Alexa+ hackathon MVP</span><span>Strands Agents + Amazon Bedrock</span></footer>

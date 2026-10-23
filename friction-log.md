@@ -271,5 +271,9 @@ started.
 - The production TypeScript build and visual checks of the question, evidence,
   and diagnosis sections passed. The application behavior and API contract are
   unchanged.
+- The first refinement copied too much of the Strands documentation layout and
+  palette when only its font treatment was intended. Replaced the green and
+  teal identity with CloudForge yellow and white, removed the right-hand
+  on-page navigation, and widened the application content area.
 
 The milestone 7 UI refinement is complete. Milestone 8 has not started.
