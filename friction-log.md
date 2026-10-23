@@ -312,3 +312,21 @@ materials have not started.
 - GitHub CLI was unavailable. Created the public repository through GitHub,
   preserved its MIT license commit, and pushed the sanitized `main` history to
   `ArjunKaliyath/cloudforge`.
+
+## Milestone 8 — Rules-aligned README
+
+- **Task:** Prepare the public repository for Amazon App Dev Challenge judging.
+- **Steps:** Compared the README with the official rules, then audited its track
+  declaration, MCP requirements, setup and test instructions, AWS integration
+  description, product feedback, demo guidance, license, and public links.
+- **Expected:** A judge can understand, run, test, and evaluate CloudForge from
+  the repository landing page.
+- **Actual:** The existing README was a chronological milestone log, used the
+  developer's personal AWS profile in examples, and did not gather the required
+  product feedback in one submission-ready section.
+- **Severity:** Medium; the application worked, but required submission evidence
+  was difficult to find.
+- **Workaround:** The milestone history remains available in this log and Git;
+  the README now uses generic setup instructions and a judge-focused structure.
+- **Suggestion:** Publish a machine-readable submission checklist or repository
+  template that maps each Devpost field to the expected artifact.
